@@ -4,7 +4,7 @@
 # GoTo.pm
 # by Jim Smyser
 # Copyright (C) 1996-1999 by Jim Smyser & USC/ISI
-# $Id: GoTo.pm,v 1.6 2000/04/02 23:46:34 jims Exp $
+# $Id: GoTo.pm,v 1.7 2000/05/16 19:34:43 jims Exp $
 ######################################################
 
 package WWW::Search::GoTo;
@@ -33,17 +33,9 @@ using simple queries.
 This class exports no public interface; all interaction should
 be done through WWW::Search objects.
 
-=head1 NOTES
-
-Uses result field $result->source which is helpful with this engine 
-because the the URL is owner encoded. $result->source will display a 
-plain base URL address and should be called after $result->description  
-
-
 =head1 SEE ALSO
 
 To make new back-ends, see L<WWW::Search>.
-
 
 =head1 HOW DOES IT WORK?
 
@@ -83,7 +75,7 @@ require Exporter;
 @EXPORT = qw();
 @EXPORT_OK = qw();
 @ISA = qw(WWW::Search Exporter);
-$VERSION = '1.06';
+$VERSION = '1.07';
 
 $MAINTAINER = 'Jim Smyser <jsmyser@bigfoot.com>';
 $TEST_CASES = <<"ENDTESTCASES";
@@ -168,12 +160,12 @@ sub native_retrieve_some {
        next if m@^$@; # short circuit for blank lines
        print STDERR " * $state ===$_=== " if 2 <= $self->{'_debug'};
 
-   if ($state eq $HEADER && m|<layer>|i) {
+   if ($state eq $HEADER && m|<ol start=\d+>|i) {
        print STDERR "**Beginning Line...\n" ;
        $state = $HITS;
        }
-   elsif ($state eq $HITS && m/^<li>.*?<a href="([^"]+)".*?>(.*)<\/a>.*?/i) {
-       my ($url, $title) = ($1,$2);
+   elsif ($state eq $HITS && m/^<li>.*?<b><a href=(.*)\starget=_top>(.*)<\/a><\/b><br>(.*)<br><em>/i) {
+       my ($url, $title,$desc) = ($1,$2,$3);
          if (defined($hit)) 
             {
          push(@{$self->{cache}}, $hit);
@@ -183,13 +175,11 @@ sub native_retrieve_some {
        $url = "http://goto.com" . $url;
        $hit->add_url($url) if (defined($hit));
        $hit->title($title);
-       $state = $DESC;
-       } 
-   elsif ($state eq $DESC && m/^<br>(.*)<br>/i) {
-       $hit->description($1);
+       $hit->description($desc);
        $state = $HITS;
        } 
-   elsif ($state eq $HITS && m@<a href="([^"]+)"><.*?>More Results<.*?>@i) { 
+
+   elsif ($state eq $HITS && m@<BR><table.*?<a href="(.*)"><.*?>more results</a></td></tr></table>@i) { 
        print STDERR "**Found 'next' Tag\n" if 2 <= $self->{_debug};
        my $sURL = $1;
        $self->{'_next_url'} = $self->{'search_base_url'} . $sURL;
@@ -207,3 +197,6 @@ sub native_retrieve_some {
        return $hits_found;
 }
 1;
+
+
+

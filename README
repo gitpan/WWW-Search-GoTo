@@ -1,9 +1,15 @@
-GoTo
 
-Requires WWW::Search
+GoTo.pm requires WWW::Search.
 
-Backend for WWW::Search for searching www.goto.com
+Additional information on using this script and changelog
+may be found in GoTo.pm POD doc's or, after installation, view the 
+man pages with man GoTo
 
+For instructions on how to install the script, see the
+file INSTALL.
 
-For a list of current working backends see http://members.xoom.com/backends
+See also http://www.perl.com/CPAN-local/modules/by-module/WWW/
+For latest WWW::Search version and additional documentation.
+
+Auto genereated by makeMOD.pl by Jim Smyser
 
